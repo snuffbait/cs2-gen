@@ -127,7 +127,7 @@
   </div>
 
   <div class="field" style="margin-bottom:12px">
-    <textarea id="asciiInput" placeholder="Paste your ASCII art here..."></textarea>
+    <textarea id="texttinputt" placeholder="Paste your text art here..."></textarea>
   </div>
 
   <div class="output-wrap">
@@ -145,7 +145,7 @@
   function countershitlol() {
     const alias = document.getElementById('aliasName').value.trim() || 'snuffpic';
     const key = document.getElementById('keyBind').value.trim() || 'L';
-    const raw = document.getElementById('asciiInput').value;
+    const raw = document.getElementById('texttinputt').value;
     const lines = raw.split('\n').filter(l => l.trim() !== '');
 
     if (lines.length === 0) { document.getElementById('output').value = ''; return; }
@@ -163,7 +163,7 @@
     document.getElementById('output').value = out.join('\n');
   }
 
-  document.getElementById('asciiInput').addEventListener('input', countershitlol);
+  document.getElementById('texttinputt').addEventListener('input', countershitlol);
   document.getElementById('aliasName').addEventListener('input', countershitlol);
   document.getElementById('keyBind').addEventListener('input', countershitlol);
 </script>
