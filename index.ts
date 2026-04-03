@@ -1,86 +1,281 @@
-import definePlugin from "@utils/types";
-import { CloudUpload } from "@webpack/common";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS2 Bind Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-const t = /\.tar\.\w+$/;
-const s = [".mp3", ".wav", ".flac", ".aac", ".ogg", ".m4a", ".opus", ".txt"];
-const i = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-const n = [];
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-function show(o) {
-    const e = document.createElement("div");
-    e.style.cssText = `position:fixed;top:${70 + n.length * 70}px;right:380px;background:rgba(0,0,0,.85);color:#fff;padding:10px 15px;border-radius:5px;font-size:14px;z-index:9999;box-shadow:0 2px 10px rgba(0,0,0,.5);pointer-events:none;transition:top .3s,opacity .3s;min-width:200px`;
-    e.innerHTML = `<div style="font-weight:bold;margin-bottom:3px">Uploading:</div><div style="color:#aaa;word-break:break-all">${o}</div>`;
-    
-    document.body.appendChild(e);
-    n.push(e);
-    
-    setTimeout(() => {
-        e.style.opacity = "0";
-        setTimeout(() => {
-            e.remove();
-            const x = n.indexOf(e);
-            if (x > -1) {
-                n.splice(x, 1);
-                n.forEach((a, b) => a.style.top = `${70 + b * 70}px`);
-            }
-        }, 300);
-    }, 3000);
-}
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --border: #222;
+    --border-active: #3a3a3a;
+    --text: #d4d4d4;
+    --muted: #555;
+    --accent: #e8e8e8;
+    --highlight: #c8ff00;
+    --font: 'JetBrains Mono', monospace;
+  }
 
-async function clean(f) {
-    const m = new Image();
-    const u = URL.createObjectURL(f);
-    m.src = u;
-    await new Promise(r => m.onload = r);
-    
-    const c = document.createElement("canvas");
-    c.width = m.width;
-    c.height = m.height;
-    c.getContext("2d").drawImage(m, 0, 0);
-    URL.revokeObjectURL(u);
-    
-    const b = await new Promise(r => c.toBlob(r, f.type || "image/png", 0.95));
-    return new File([b], f.name, { type: f.type || "image/png", lastModified: Date.now() });
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
 
-function rand(len) {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let j = 0; j < len; j++) {
-        result += chars[Math.floor(Math.random() * chars.length)];
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  header h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  input[type="text"] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 9px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--border-active);
+  }
+
+  textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 12px;
+    width: 100%;
+    resize: vertical;
+    min-height: 180px;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+
+  textarea:focus {
+    border-color: var(--border-active);
+  }
+
+  .output-wrap {
+    position: relative;
+    margin-top: 16px;
+  }
+
+  #output {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: #999;
+    font-family: var(--font);
+    font-size: 11.5px;
+    padding: 14px 12px;
+    width: 100%;
+    resize: none;
+    min-height: 260px;
+    outline: none;
+    line-height: 1.7;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  button {
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    padding: 8px 18px;
+    transition: all 0.12s;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  button:hover {
+    border-color: var(--border-active);
+    color: var(--accent);
+  }
+
+  button.primary {
+    background: var(--highlight);
+    color: #000;
+    border-color: var(--highlight);
+    font-weight: 700;
+  }
+
+  button.primary:hover {
+    background: #d4e600;
+    border-color: #d4e600;
+  }
+
+  button.copied {
+    color: var(--highlight);
+    border-color: var(--highlight);
+  }
+
+  .section-title {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 20px;
+    border-left: 2px solid var(--border);
+    padding-left: 12px;
+    line-height: 1.8;
+  }
+
+  .note span {
+    color: var(--text);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  .paste-label {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>CS2 Bind Generator</h1>
+  </header>
+
+  <div class="row">
+    <div class="field">
+      <label>Alias name</label>
+      <input type="text" id="aliasName" placeholder="snuffpic" value="snuffpic" />
+    </div>
+    <div class="field">
+      <label>Key bind</label>
+      <input type="text" id="keyBind" placeholder="L" value="L" maxlength="20" />
+    </div>
+  </div>
+
+  <div class="field" style="margin-bottom:12px">
+    <textarea id="asciiInput" placeholder="Paste your ASCII art here..."></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="output-wrap">
+    <textarea id="output" readonly placeholder="// Output will appear here..."></textarea>
+  </div>
+
+  <div class="note">
+    <span>How to use:</span> Save as a .cfg file > put in <span>Counter-Strike 2/game/csgo/cfg/</span> > in game type <span>exec filename</span> in console. Press your key in chat to cycle through each line.<br><br>
+    <span>Note:</span> CS2 chat has a character limit per message. If lines are too long they may get cut off you might need to trim or split those lines manually in the output before using the bind.
+  </div>
+
+</div>
+
+<script>
+  function countershitlol() {
+    const alias = document.getElementById('aliasName').value.trim() || 'snuffpic';
+    const key = document.getElementById('keyBind').value.trim() || 'L';
+    const raw = document.getElementById('asciiInput').value;
+    const lines = raw.split('\n').filter(l => l.trim() !== '');
+
+    if (lines.length === 0) {
+      document.getElementById('output').value = '';
+      return;
     }
-    return result;
-}
 
-export default definePlugin({
-    name: "AAAAAAAAAAA FAE",
-    description: "fae fae fae",
-    authors: [{ id: "832999544844845056", name: "Fae" }],
-    
-    patches: [{
-        find: "async uploadFiles(",
-        replacement: [{
-            match: /async uploadFiles\((\i)\){/,
-            replace: "$&await Promise.all($1.map($self.run));"
-        }]
-    }],
-    
-    async run(u) {
-        const l = u.filename.toLowerCase();
-        if (s.some(e => l.endsWith(e))) return;
-        
-        const o = u.filename;
-        
-        if (i.some(e => l.endsWith(e)) && u.item.file) {
-            u.item.file = await clean(u.item.file);
-        }
-        
-        const m = t.exec(u.filename);
-        const x = m?.index ?? u.filename.lastIndexOf(".");
-        const e = x !== -1 ? u.filename.slice(x) : "";
-        const r = rand(8);
-        u.filename = `Fae_was_here_${r}${e}`;
-        
-        show(o);
-    }
-});
+    const total = lines.length;
+    let out = [];
+
+    out.push(`alias ${alias} "${alias}1"`);
+
+    lines.forEach((line, i) => {
+      const num = i + 1;
+      const next = (i + 1 < total) ? (i + 2) : 1;
+      const safe = line.replace(/"/g, '\\"');
+      out.push(`alias ${alias}${num} "say ${safe}; alias ${alias} ${alias}${next}"`);
+    });
+
+    out.push(`bind ${key} "${alias}"`);
+    document.getElementById('output').value = out.join('\n');
+  }
+
+  document.getElementById('asciiInput').addEventListener('input', countershitlol);
+  document.getElementById('aliasName').addEventListener('input', countershitlol);
+  document.getElementById('keyBind').addEventListener('input', countershitlol);
+</script>
+</body>
+</html>
