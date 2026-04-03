@@ -30,50 +30,12 @@
     padding: 40px 20px;
   }
 
-  .wrap {
-    max-width: 780px;
-    margin: 0 auto;
-  }
+  .wrap { max-width: 780px; margin: 0 auto; }
 
-  header {
-    margin-bottom: 40px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
 
-  header h1 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  header p {
-    color: var(--muted);
-    margin-top: 6px;
-    font-size: 12px;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
+  label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
 
   input[type="text"] {
     background: var(--surface);
@@ -87,9 +49,7 @@
     transition: border-color 0.15s;
   }
 
-  input[type="text"]:focus {
-    border-color: var(--border-active);
-  }
+  input[type="text"]:focus { border-color: var(--border-active); }
 
   textarea {
     background: var(--surface);
@@ -106,14 +66,9 @@
     transition: border-color 0.15s;
   }
 
-  textarea:focus {
-    border-color: var(--border-active);
-  }
+  textarea:focus { border-color: var(--border-active); }
 
-  .output-wrap {
-    position: relative;
-    margin-top: 16px;
-  }
+  .output-wrap { position: relative; margin-top: 16px; }
 
   #output {
     background: var(--surface);
@@ -127,12 +82,6 @@
     min-height: 260px;
     outline: none;
     line-height: 1.7;
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
   }
 
   button {
@@ -149,35 +98,7 @@
     color: var(--muted);
   }
 
-  button:hover {
-    border-color: var(--border-active);
-    color: var(--accent);
-  }
-
-  button.primary {
-    background: var(--highlight);
-    color: #000;
-    border-color: var(--highlight);
-    font-weight: 700;
-  }
-
-  button.primary:hover {
-    background: #d4e600;
-    border-color: #d4e600;
-  }
-
-  button.copied {
-    color: var(--highlight);
-    border-color: var(--highlight);
-  }
-
-  .section-title {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
+  button:hover { border-color: var(--border-active); color: var(--accent); }
 
   .note {
     font-size: 11px;
@@ -188,28 +109,11 @@
     line-height: 1.8;
   }
 
-  .note span {
-    color: var(--text);
-  }
-  
-  .paste-label {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    pointer-events: none;
-  }
+  .note span { color: var(--text); }
 </style>
 </head>
 <body>
 <div class="wrap">
-
-  <header>
-    <h1>CS2 Bind Generator</h1>
-  </header>
 
   <div class="row">
     <div class="field">
@@ -244,23 +148,17 @@
     const raw = document.getElementById('asciiInput').value;
     const lines = raw.split('\n').filter(l => l.trim() !== '');
 
-    if (lines.length === 0) {
-      document.getElementById('output').value = '';
-      return;
-    }
+    if (lines.length === 0) { document.getElementById('output').value = ''; return; }
 
     const total = lines.length;
     let out = [];
-
     out.push(`alias ${alias} "${alias}1"`);
-
     lines.forEach((line, i) => {
       const num = i + 1;
       const next = (i + 1 < total) ? (i + 2) : 1;
       const safe = line.replace(/"/g, '\\"');
       out.push(`alias ${alias}${num} "say ${safe}; alias ${alias} ${alias}${next}"`);
     });
-
     out.push(`bind ${key} "${alias}"`);
     document.getElementById('output').value = out.join('\n');
   }
